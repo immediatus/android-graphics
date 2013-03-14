@@ -13,22 +13,20 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.IntBuffer
 
+import scala.collection.mutable.HashMap
+import scala.collection.mutable.SynchronizedMap
+
 
 object GL10Wrapper {
 
-  private var _glWrapper: GL10Wrapper = null
+  private var _glWrappers = new HashMap[GL10,GL10Wrapper] with SynchronizedMap[GL10,GL10Wrapper]
 
   def apply(gl: GL10) = {
-    if(_glWrapper != null && _glWrapper.gl == gl) _glWrapper
-    else {
-      _glWrapper = new GL10Wrapper(gl)
-      _glWrapper
-    }
+    _glWrappers.getOrElseUpdate(gl, new GL10Wrapper(gl))
   }
 }
 
 class GL10Wrapper(val gl: GL10) {
-    val BYTES_PER_FLOAT = 4
     val IS_LITTLE_ENDIAN = (ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN)
 
     def EXTENSIONS_VERTEXBUFFEROBJECTS = _extensionsVertexBufferObjects
