@@ -7,42 +7,49 @@ import com.immediatus.graphics.utils.PixelFormat
 
 
 abstract class Texture(
-    protected var PixelFormat: PixelFormat,
-    protected var TextureOptions: TextureOptions) {
+    private var _pixelFormat: PixelFormat,
+    private var _textureOptions: TextureOptions) {
 
   private val HARDWARETEXTUREID_FETCHER = new Array[Int](1)
-  private var onLoadedToHardware: Texture => Unit = null
-  private var onUnloadedFromHardware: Texture => Unit = null
 
-  protected var HardwareTextureID = -1
-  protected var LoadedToHardware = false
-  protected var UpdateOnHardwareNeeded = false
+  private var _onLoadedToHardware: Texture => Unit = null
+  private var _onUnloadedFromHardware: Texture => Unit = null
+
+  protected var _hardwareTextureID = -1
+  protected var _loadedToHardware = false
+  protected var _updateOnHardwareNeeded = false
 
   protected def writeTextureToHardware(gl: GL10)
 
   protected def applyTextureOptions(gl: GL10) {
-    TextureOptions(gl)
+    _textureOptions(gl)
   }
 
   protected def bindTextureOnHardware(gl: GL10){
-    GL10Wrapper(gl).forceBindTexture(HardwareTextureID)
+    GL10Wrapper(gl).forceBindTexture(_hardwareTextureID)
   }
 
   protected def deleteTextureOnHardware(gl: GL10){
-    GL10Wrapper(gl).deleteTexture(HardwareTextureID);
+    GL10Wrapper(gl).deleteTexture(_hardwareTextureID);
   }
 
   protected def generateHardwareTextureID(gl: GL10){
     gl.glGenTextures(1, HARDWARETEXTUREID_FETCHER, 0);
-    HardwareTextureID = HARDWARETEXTUREID_FETCHER(0);
+    _hardwareTextureID = HARDWARETEXTUREID_FETCHER(0);
   }
 
-  def hardwareTextureID = HardwareTextureID
-  def isLoadedToHardware = LoadedToHardware
-  def isUpdateOnHardwareNeeded =UpdateOnHardwareNeeded
+  protected def onLoadedToHardware(texture: Texture) = if(_onLoadedToHardware != null) _onLoadedToHardware(texture)
 
-  def pixelFormat = PixelFormat
-  def textureOptions = TextureOptions
+  protected def onUnloadedFromHardware(texture: Texture) = if(_onUnloadedFromHardware != null) _onUnloadedFromHardware(texture)
+
+  def hardwareTextureID = _hardwareTextureID
+  def isLoadedToHardware = _loadedToHardware
+  def isUpdateOnHardwareNeeded = _updateOnHardwareNeeded
+
+  def markToReload = _updateOnHardwareNeeded = true
+
+  def pixelFormat = _pixelFormat
+  def textureOptions = _textureOptions
 
   def loadToHardware(gl: GL10): this.type = {
     GL10Wrapper(gl).enableTextures
@@ -52,10 +59,10 @@ abstract class Texture(
     applyTextureOptions(gl)
     writeTextureToHardware(gl)
 
-    UpdateOnHardwareNeeded = false
-    LoadedToHardware = true
+    _updateOnHardwareNeeded = false
+    _loadedToHardware = true
 
-    if (onLoadedToHardware != null) onLoadedToHardware(this)
+    onLoadedToHardware(this)
 
     this
   }
@@ -65,10 +72,10 @@ abstract class Texture(
 
     deleteTextureOnHardware(gl)
 
-    HardwareTextureID = -1
-    LoadedToHardware = false
+    _hardwareTextureID = -1
+    _loadedToHardware = false
 
-    if (onUnloadedFromHardware != null) onUnloadedFromHardware(this)
+    onUnloadedFromHardware(this)
 
     this
   }
@@ -81,19 +88,19 @@ abstract class Texture(
   }
 
   def bind(gl: GL10): this.type = {
-    GL10Wrapper(gl).bindTexture(HardwareTextureID)
+    GL10Wrapper(gl).bindTexture(_hardwareTextureID)
 
     this
   }
 
   def onLoadedToHardware(f: Texture => Unit): this.type = {
-    onLoadedToHardware = f
+    _onLoadedToHardware = f
 
     this
   }
 
   def onUnloadedFromHardware(f: Texture => Unit): this.type = {
-    onUnloadedFromHardware = f
+    _onUnloadedFromHardware = f
 
     this
   }

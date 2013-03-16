@@ -8,14 +8,12 @@ import android.os.Build
 import javax.microedition.khronos.opengles.GL10
 import javax.microedition.khronos.opengles.GL11
 
-import java.nio.Buffer
 import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import java.nio.IntBuffer
+import java.nio.ByteOrder
 
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.SynchronizedMap
-
 
 object GL10Wrapper {
 
@@ -463,10 +461,10 @@ class GL10Wrapper(val gl: GL10) {
       val pixelsARGB_8888 = getPixelsARGB_8888(bitmap)
 
       pixelFormat match {
-        case RGB_565 => ByteBuffer.wrap(convertARGB_8888toRGB_565(pixelsARGB_8888))
-        case RGBA_8888 => IntBuffer.wrap(convertARGB_8888toRGBA_8888(pixelsARGB_8888))
-        case RGBA_4444 => ByteBuffer.wrap(convertARGB_8888toARGB_4444(pixelsARGB_8888))
-        case A_8 => ByteBuffer.wrap(convertARGB_8888toA_8(pixelsARGB_8888))
+        case PixelFormat.RGB_565 => ByteBuffer.wrap(convertARGB_8888toRGB_565(pixelsARGB_8888))
+        case PixelFormat.RGBA_8888 => IntBuffer.wrap(convertARGB_8888toRGBA_8888(pixelsARGB_8888))
+        case PixelFormat.RGBA_4444 => ByteBuffer.wrap(convertARGB_8888toARGB_4444(pixelsARGB_8888))
+        case PixelFormat.A_8 => ByteBuffer.wrap(convertARGB_8888toA_8(pixelsARGB_8888))
         case _ => ByteBuffer.wrap(Array[Byte](0))
       }
     }

@@ -1,4 +1,4 @@
-package com.immediatus.utils
+package com.immediatus.graphics.utils
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -55,6 +55,8 @@ class FastFloatBuffer(c: Int) {
 
     this
   }
+
+  def buffer = _buffer
 
   def capacity = _floatBuffer.capacity
 

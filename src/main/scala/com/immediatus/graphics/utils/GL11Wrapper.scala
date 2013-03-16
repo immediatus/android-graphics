@@ -1,47 +1,60 @@
 package com.immediatus.graphics.utils
 
-import android.graphics.Bitmap
-import android.opengl.GLES20
-import android.opengl.GLException
-import android.os.Build
-
-import javax.microedition.khronos.opengles.GL10
 import javax.microedition.khronos.opengles.GL11
+import javax.microedition.khronos.opengles.GL10
 
-import java.nio.Buffer
 import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.nio.IntBuffer
 
-case class GL11Wrapper(gl: GL11) {
-//    private static final int[] HARDWAREBUFFERID_CONTAINER = new int[1]
-
-    private var _currentHardwareBufferID = -1
+import scala.collection.mutable.HashMap
+import scala.collection.mutable.SynchronizedMap
 
 
-//    def bindBuffer(final GL11 gl11_, final int hardwareBufferID_){
-//        if (_currentHardwareBufferID != hardwareBufferID_){
-//            _currentHardwareBufferID = hardwareBufferID_;
-//            gl11_.glBindBuffer(GL11.GL_ARRAY_BUFFER, hardwareBufferID_);
-//        }
-//    }
-//
-//    def deleteBuffer(final GL11 gl11_, final int hardwareBufferID_){
-//        HARDWAREBUFFERID_CONTAINER[0] = hardwareBufferID_;
-//        gl11_.glDeleteBuffers(1, OpenGLWrapper.HARDWAREBUFFERID_CONTAINER, 0);
-//    }
-//
-//
-//    def texCoordZeroPointer(final GL11 gl11_){
-//        gl11_.glTexCoordPointer(2, GL10.GL_FLOAT, 0, 0);
-//    }
-//
-//    def vertexZeroPointer(final GL11 gl11_){
-//        gl11_.glVertexPointer(2, GL10.GL_FLOAT, 0, 0);
-//    }
-//
-//    def bufferData(final GL11 gl11_, final ByteBuffer byteBuffer_, final int usage_){
-//        gl11_.glBufferData(GL11.GL_ARRAY_BUFFER, byteBuffer_.capacity(), byteBuffer_, usage_);
-//    }
+object GL11Wrapper {
 
+  private var _glWrappers = new HashMap[GL11,GL11Wrapper] with SynchronizedMap[GL11,GL11Wrapper]
+
+  def apply(gl: GL11) = {
+    _glWrappers.getOrElseUpdate(gl, new GL11Wrapper(gl))
+  }
+}
+
+
+class GL11Wrapper(gl: GL11) {
+
+  private val HARDWAREBUFFERID_CONTAINER = new Array[Int](1)
+  private var _currentHardwareBufferID = -1
+
+  def bindBuffer(hardwareBufferID: Int): this.type = {
+    if (_currentHardwareBufferID != hardwareBufferID) {
+      _currentHardwareBufferID = hardwareBufferID
+      gl.glBindBuffer(GL11.GL_ARRAY_BUFFER, hardwareBufferID)
+    }
+
+    this
+  }
+
+  def deleteBuffer(hardwareBufferID: Int): this.type = {
+    HARDWAREBUFFERID_CONTAINER(0) = hardwareBufferID
+    gl.glDeleteBuffers(1, HARDWAREBUFFERID_CONTAINER, 0);
+
+    this
+  }
+
+  def texCoordZeroPointer(): this.type = {
+    gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, 0)
+
+    this
+  }
+
+  def vertexZeroPointer(): this.type = {
+    gl.glVertexPointer(2, GL10.GL_FLOAT, 0, 0)
+
+    this
+  }
+
+  def bufferData(byteBuffer: ByteBuffer, usage: Int): this.type = {
+    gl.glBufferData(GL11.GL_ARRAY_BUFFER, byteBuffer.capacity, byteBuffer, usage)
+
+    this
+  }
 }
