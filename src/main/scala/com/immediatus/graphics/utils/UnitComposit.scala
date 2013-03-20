@@ -2,8 +2,6 @@ package com.immediatus.graphics.utils
 
 import scala.collection.mutable.ListBuffer
 
-import com.immediatus.graphics.contracts.IGraphicsUnit
-
 trait UnitComposit {
 
   private var _parent : UnitComposit = null
