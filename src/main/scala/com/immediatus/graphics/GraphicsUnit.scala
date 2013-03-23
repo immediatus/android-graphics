@@ -1,5 +1,9 @@
 package com.immediatus.graphics
 
+import javax.microedition.khronos.opengles.GL10
+
+import com.immediatus.graphics.utils.Transformation
+
 trait GraphicsUnit {
 
   private var _visible = true
@@ -17,7 +21,7 @@ trait GraphicsUnit {
   private val _initialX = _x
   private val _initialY = _y
 
-  private var _rotation = 0
+  private var _rotation = 0f
 
   private var _rotationCenterX = 0f
   private var _rotationCenterY = 0f
@@ -31,17 +35,17 @@ trait GraphicsUnit {
   private var _localToParentTransformationDirty = true
   private var _parentToLocalTransformationDirty = true
 
-//  private val _localToParentTransformation = new Transformation()
-//  private val _parentToLocalTransformation = new Transformation()
+  private var _localToParentTransformation = Transformation()
+  private var _parentToLocalTransformation = Transformation()
 
-//  private val _localToLayerTransformation = new Transformation()
-//  private val _layerToLocalTransformation = new Transformation()
+  private var _localToLayerTransformation = Transformation()
+  private var _layerToLocalTransformation = Transformation()
 
   def isVisible = _visible
   def isIgnoreUpdate = _ignoreUpdate
   def zIndex = _zIndex
-  def X = _x
-  def Y = _y
+  def x = _x
+  def y = _y
   def initialX = _initialX
   def initialY = _initialY;
   def rotationCenterX = _rotationCenterX
@@ -58,202 +62,141 @@ trait GraphicsUnit {
   def blue = _blue
   def alpha = _alpha
 
-//  def setPosition(x: Float, y: Float) {
-//    _x = x
-//    _y = y
-//    _localToParentTransformationDirty = true
-//    _parentToLocalTransformationDirty = true
+  def setPosition(x: Float, y: Float) {
+    _x = x
+    _y = y
+    _localToParentTransformationDirty = true
+    _parentToLocalTransformationDirty = true
+  }
+
+  def setInitialPosition() {
+    _x = _initialX
+    _y = _initialY
+    _localToParentTransformationDirty = true
+    _parentToLocalTransformationDirty = true
+  }
+
+  def rotate(rotation: Float){
+    _rotation = rotation
+    _localToParentTransformationDirty = true
+    _parentToLocalTransformationDirty = true
+  }
+
+  def setColorA(red: Float, green: Float, blue: Float, alpha:Float) {
+    _red = red
+    _green = green
+    _blue = blue
+    _alpha=  alpha
+  }
+
+  val setColor = setColorA(_: Float, _: Float, _: Float, 1f)
+
+  def getLocalToParentTransformation(): Transformation = {
+    if(_localToParentTransformationDirty) {
+      _localToParentTransformationDirty = false
+      _localToParentTransformation = Transformation().
+        $if(_scaleX != 1 || _scaleY != 1) {
+          _.postTranslate(-_scaleCenterX, -_scaleCenterY).
+          postScale(_scaleX, _scaleY).
+          postTranslate(_scaleCenterX, _scaleCenterY)
+        }.$if(rotation != 0) {
+          _.postTranslate(-_rotationCenterX, -_rotationCenterY).
+          postRotate(_rotation).
+          postTranslate(_rotationCenterX, _rotationCenterY)
+        }.postTranslate(_x, _y)
+    }
+
+    _localToParentTransformation
+  }
+
+  def getParentToLocalTransformation(): Transformation = {
+    if(_parentToLocalTransformationDirty) {
+    _parentToLocalTransformationDirty = false;
+    _parentToLocalTransformation = Transformation().
+      postTranslate(_x, _y).
+      $if(_rotation != 0) {
+        _.postTranslate(-_rotationCenterX, -_rotationCenterY).
+        postRotate(-_rotation).
+        postTranslate(_rotationCenterX, _rotationCenterY)
+      }.$if(_scaleX != 1 || _scaleY != 1) {
+        _.postTranslate(-scaleCenterX, -scaleCenterY).
+        postScale(1 / _scaleX, 1 / _scaleY).
+        postTranslate(_scaleCenterX, _scaleCenterY)
+      }
+    }
+
+    _parentToLocalTransformation
+  }
+
+  def getLocalToLayerTransformation(): Transformation
+  def getLayerToLocalTransformation(): Transformation
+
+//  def getLocalToLayerTransformation(): Transformation = {
+//    _localToLayerTransformation = getLocalToParentTransformation().
+//      $if(parent != null) {
+//        _.postConcat(parent.getLocalToLayerTransformation())
+//      }
+//
+//    _localToLayerTransformation
 //  }
 //
-//  def setInitialPosition() {
-//    _x = _initialX
-//    _y = _initialY
-//    _localToParentTransformationDirty = true
-//    _parentToLocalTransformationDirty = true
+//  def getLayerToLocalTransformation(): Transformation = {
+//    _layerToLocalTransformation = getParentToLocalTransformation().
+//      $if(parent != null) {
+//        _.postConcat(parent.getLayerToLocalTransformation())
+//      }
+//
+//    _layerToLocalTransformation
 //  }
-//
-//  def rotate(rotation: Float){
-//    _rotation = rotation
-//    _localToParentTransformationDirty = true
-//    _parentToLocalTransformationDirty = true
-//  }
-//
-//
-//    public Transformation getLocalToParentTransformation(){
-//        final Transformation localToParentTransformation = this._localToParentTransformation;
-//        if (this._localToParentTransformationDirty){
-//            localToParentTransformation.setToIdentity();
-//
-//            final float scaleX = this._scaleX;
-//            final float scaleY = this._scaleY;
-//            if (scaleX != 1 || scaleY != 1){
-//                final float scaleCenterX = this._scaleCenterX;
-//                final float scaleCenterY = this._scaleCenterY;
-//                localToParentTransformation.postTranslate(-scaleCenterX, -scaleCenterY);
-//                localToParentTransformation.postScale(scaleX, scaleY);
-//                localToParentTransformation.postTranslate(scaleCenterX, scaleCenterY);
-//            }
-//
-//            final float rotation = this._rotation;
-//            if (rotation != 0){
-//                final float rotationCenterX = this._rotationCenterX;
-//                final float rotationCenterY = this._rotationCenterY;
-//                localToParentTransformation.postTranslate(-rotationCenterX, -rotationCenterY);
-//                localToParentTransformation.postRotate(rotation);
-//                localToParentTransformation.postTranslate(rotationCenterX, rotationCenterY);
-//            }
-//            localToParentTransformation.postTranslate(this._x, this._y);
-//            this._localToParentTransformationDirty = false;
-//        }
-//        return localToParentTransformation;
-//    }
-//
-//    public Transformation getParentToLocalTransformation(){
-//        final Transformation parentToLocalTransformation = this._parentToLocalTransformation;
-//        if (this._parentToLocalTransformationDirty){
-//            parentToLocalTransformation.setToIdentity();
-//            parentToLocalTransformation.postTranslate(-this._x, -this._y);
-//            final float rotation = this._rotation;
-//            if (rotation != 0){
-//                final float rotationCenterX = this._rotationCenterX;
-//                final float rotationCenterY = this._rotationCenterY;
-//                parentToLocalTransformation.postTranslate(-rotationCenterX, -rotationCenterY);
-//                parentToLocalTransformation.postRotate(-rotation);
-//                parentToLocalTransformation.postTranslate(rotationCenterX, rotationCenterY);
-//            }
-//            final float scaleX = this._scaleX;
-//            final float scaleY = this._scaleY;
-//            if (scaleX != 1 || scaleY != 1){
-//                final float scaleCenterX = this._scaleCenterX;
-//                final float scaleCenterY = this._scaleCenterY;
-//                parentToLocalTransformation.postTranslate(-scaleCenterX, -scaleCenterY);
-//                parentToLocalTransformation.postScale(1 / scaleX, 1 / scaleY);
-//                parentToLocalTransformation.postTranslate(scaleCenterX, scaleCenterY);
-//            }
-//            this._parentToLocalTransformationDirty = false;
-//        }
-//        return parentToLocalTransformation;
-//    }
-//
-//    public Transformation getLocalToLayerTransformation(){
-//        final Transformation localToLayerTransformation = this._localToLayerTransformation;
-//        localToLayerTransformation.setTo(this.getLocalToParentTransformation());
-//
-//        final IUnit parent = this._parent;
-//        if (parent != null){
-//            localToLayerTransformation.postConcat(parent.getLocalToLayerTransformation());
-//        }
-//
-//        return localToLayerTransformation;
-//    }
-//
-//    public Transformation getLayerToLocalTransformation(){
-//        final Transformation layerToLocalTransformation = this._layerToLocalTransformation;
-//        layerToLocalTransformation.setTo(this.getParentToLocalTransformation());
-//
-//        final IUnit parent = this._parent;
-//        if (parent != null){
-//            layerToLocalTransformation.postConcat(parent.getLayerToLocalTransformation());
-//        }
-//
-//        return layerToLocalTransformation;
-//    }
-//
-//    public float[] convertLocalToLayerCoordinates(final float x_, final float y_){
-//        return this.convertLocalToLayerCoordinates(x_, y_, VERTICES_LOCAL_TO_SCENE_TMP);
-//    }
-//
-//    public float[] convertLocalToLayerCoordinates(final float x_, final float y_, final float[] reuse_){
-//        reuse_[VERTEX_INDEX_X] = x_;
-//        reuse_[VERTEX_INDEX_Y] = y_;
-//        this.getLocalToLayerTransformation().transform(reuse_);
-//        return reuse_;
-//    }
-//
-//    public float[] convertLocalToLayerCoordinates(final float[] coord_){
-//        return this.convertLayerToLocalCoordinates(coord_, VERTICES_LOCAL_TO_SCENE_TMP);
-//    }
-//
-//    public float[] convertLocalToLayerCoordinates(final float[] coord_, final float[] reuse_){
-//        reuse_[VERTEX_INDEX_X] = coord_[VERTEX_INDEX_X];
-//        reuse_[VERTEX_INDEX_Y] = coord_[VERTEX_INDEX_Y];
-//        this.getLocalToLayerTransformation().transform(reuse_);
-//        return reuse_;
-//    }
-//
-//    public float[] convertLayerToLocalCoordinates(final float x_, final float y_){
-//        return this.convertLayerToLocalCoordinates(x_, y_, VERTICES_SCENE_TO_LOCAL_TMP);
-//    }
-//
-//    public float[] convertLayerToLocalCoordinates(final float x_, final float y_, final float[] reuse_){
-//        reuse_[VERTEX_INDEX_X] = x_;
-//        reuse_[VERTEX_INDEX_Y] = y_;
-//        this.getLayerToLocalTransformation().transform(reuse_);
-//        return reuse_;
-//    }
-//
-//    public float[] convertLayerToLocalCoordinates(final float[] coord_){
-//        return this.convertLayerToLocalCoordinates(coord_, VERTICES_SCENE_TO_LOCAL_TMP);
-//    }
-//
-//    public float[] convertLayerToLocalCoordinates(final float[] coord_, final float[] reuse_){
-//        reuse_[VERTEX_INDEX_X] = coord_[VERTEX_INDEX_X];
-//        reuse_[VERTEX_INDEX_Y] = coord_[VERTEX_INDEX_Y];
-//        this.getLayerToLocalTransformation().transform(reuse_);
-//        return reuse_;
-//    }
-//
-//  def reset(){
-//    _visible = true
-//    _ignoreUpdate = false
-//    _x = this._initialX
-//    _y = this._initialY
-//    _rotation = 0
-//    _scaleX = 1
-//    _scaleY = 1
-//    _red = 1.0f
-//    _green = 1.0f
-//    _blue = 1.0f
-//    _alpha = 1.0f
-//  }
-//
-//
-//    protected void onApplyTransformations(final GL10 gl_){
-//        this.applyTranslation(gl_);
-//        this.applyRotation(gl_);
-//        this.applyScale(gl_);
-//    }
-//
-//    protected void applyTranslation(final GL10 gl_){
-//        gl_.glTranslatef(this._x, this._y, 0);
-//    }
-//
-//    protected void applyRotation(final GL10 gl_){
-//        final float rotation = this._rotation;
-//
-//        if (rotation != 0){
-//            final float rotationCenterX = this._rotationCenterX;
-//            final float rotationCenterY = this._rotationCenterY;
-//
-//            gl_.glTranslatef(rotationCenterX, rotationCenterY, 0);
-//            gl_.glRotatef(rotation, 0, 0, 1);
-//            gl_.glTranslatef(-rotationCenterX, -rotationCenterY, 0);
-//        }
-//    }
-//
-//    protected void applyScale(final GL10 gl_){
-//        final float scaleX = this._scaleX;
-//        final float scaleY = this._scaleY;
-//
-//        if (scaleX != 1 || scaleY != 1){
-//            final float scaleCenterX = this._scaleCenterX;
-//            final float scaleCenterY = this._scaleCenterY;
-//
-//            gl_.glTranslatef(scaleCenterX, scaleCenterY, 0);
-//            gl_.glScalef(scaleX, scaleY, 1);
-//            gl_.glTranslatef(-scaleCenterX, -scaleCenterY, 0);
-//        }
-//    }
+
+  def convertLocalToLayerCoordinates(x: Float, y: Float) = getLocalToLayerTransformation().transform(x, y)
+
+  def convertLocalToLayerCoordinates(coord: Float*) = getLocalToLayerTransformation().transform(coord: _*)
+
+  def convertLayerToLocalCoordinates(x: Float, y: Float) = getLayerToLocalTransformation().transform(x, y)
+
+  def convertLayerToLocalCoordinates(coord: Float*) = getLayerToLocalTransformation().transform(coord: _*)
+
+  def reset(){
+    _visible = true
+    _ignoreUpdate = false
+    _x = this._initialX
+    _y = this._initialY
+    _rotation = 0
+    _scaleX = 1
+    _scaleY = 1
+    _red = 1.0f
+    _green = 1.0f
+    _blue = 1.0f
+    _alpha = 1.0f
+  }
+
+
+  protected def onApplyTransformations(gl: GL10){
+    applyTranslation(gl)
+    applyRotation(gl)
+    applyScale(gl)
+  }
+
+  protected def applyTranslation(gl: GL10) {
+    gl.glTranslatef(_x, _y, 0)
+  }
+
+  protected def applyRotation(gl: GL10) {
+    if (_rotation != 0) {
+      gl.glTranslatef(_rotationCenterX, _rotationCenterY, 0)
+      gl.glRotatef(_rotation, 0, 0, 1)
+      gl.glTranslatef(-_rotationCenterX, -_rotationCenterY, 0)
+    }
+  }
+
+  protected def applyScale(gl: GL10) {
+    if (_scaleX != 1 || _scaleY != 1) {
+      gl.glTranslatef(_scaleCenterX, _scaleCenterY, 0)
+      gl.glScalef(_scaleX, _scaleY, 1)
+      gl.glTranslatef(-_scaleCenterX, -_scaleCenterY, 0)
+    }
+  }
 //
 //  def onManagedDraw(final GL10 gl_, final Camera camera_){
 //        gl_.glPushMatrix();

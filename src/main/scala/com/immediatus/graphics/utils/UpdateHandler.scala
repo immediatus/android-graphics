@@ -11,7 +11,7 @@ trait UpdateHandler {
   def onUpdate(secondsElapsed: Float)
   def reset()
 
-  protected def onManagedUpdate(secondsElapsed: Float) {
+  def onManagedUpdate(secondsElapsed: Float) {
     onUpdate(secondsElapsed)
 
     _handlers.foreach(handler => {

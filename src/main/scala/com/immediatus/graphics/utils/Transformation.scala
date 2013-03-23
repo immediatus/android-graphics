@@ -16,8 +16,10 @@ class Transformation(
     val ty: Float = 0.0f
   ) {
 
-  private val DEG_TO_RAD = Math.PI.toFloat / 180.0f
+  private final val DEG_TO_RAD = Math.PI.toFloat / 180.0f
   private def degToRad(degree: Float) =  DEG_TO_RAD * degree
+
+  def $if(condition: => Boolean)(f: Transformation => Transformation): Transformation = if(condition) f(this) else this
 
   def preTranslate(x: Float, y: Float): Transformation = Transformation(a, b, c, d, tx + x * a + y * c, ty + x * b + y * d)
 
@@ -59,7 +61,7 @@ class Transformation(
 
   def preConcat(t: Transformation ): Transformation = preConcat(t.a, t.b, t.c, t.d, t.tx, t.ty)
 
-  def transform(vertices: Float *): Array[Float] = vertices.grouped(2).flatMap{ case (x :: y :: Nil) => (x * a + y * c + tx) :: (x * b + y * d + ty) :: Nil }.toArray
+  def transform(vertices: Float *): Iterator[Float] = vertices.grouped(2).flatMap{ case (x :: y :: Nil) => (x * a + y * c + tx) :: (x * b + y * d + ty) :: Nil }
 
   private def preConcat(a1: Float, b1: Float, c1: Float, d1: Float, tx1: Float, ty1: Float) =
     Transformation(a1 * a + b1 * c, a1 * b + b1 * d, c1 * a + d1 * c, c1 * b + d1 * d, tx1 * a + ty1 * c + tx, tx1 * b + ty1 * d + ty)
