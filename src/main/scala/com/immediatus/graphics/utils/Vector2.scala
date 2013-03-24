@@ -1,9 +1,8 @@
 package com.immediatus.graphics.utils
 
 case class Vector2(x: Float, y: Float) {
-  private val PI = 3.1415927F
-  private val RADIANS_TO_DEGREES = 180F / PI
-  private val DEGREES_TO_RADIANS = PI / 180
+  private val RADIANS_TO_DEGREES = 180f / Math.PI
+  private val DEGREES_TO_RADIANS = Math.PI / 180f
 
   def len() = Math.sqrt(len2).toFloat
 

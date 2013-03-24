@@ -62,7 +62,7 @@ class FastFloatBuffer(c: Int) {
 
   def position = _floatBuffer.position
 
-  def position_= (p: Int):Unit = {
+  def position_=(p: Int):Unit = {
      _buffer.position(p * BYTES_PER_FLOAT)
      _floatBuffer.position(p)
      _intBuffer.position(p)

@@ -7,9 +7,7 @@ trait UpdateHandler {
 
   private var _handlers = ListBuffer[UpdateHandler]()
 
-
   def onUpdate(secondsElapsed: Float)
-  def reset()
 
   def onManagedUpdate(secondsElapsed: Float) {
     onUpdate(secondsElapsed)

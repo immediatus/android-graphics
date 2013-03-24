@@ -27,6 +27,7 @@ abstract class BufferObject(
   def isLoadedToHardware = _loadedToHardware
   def markToReload = _loadedToHardware = false
   def setHardwareBufferNeedsUpdate() = _hardwareBufferNeedsUpdate = true
+  def setManaged(managed: Boolean): Unit = _managed = managed
 
   def selectOnHardware(gl: GL11) {
     if (_hardwareBufferID != -1) {

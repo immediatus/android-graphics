@@ -2,10 +2,13 @@ package com.immediatus.graphics.vertex
 
 import com.immediatus.graphics.utils.FastFloatBuffer
 
+object RectangleVertexBuffer {
+  final val VERTICES_PER_RECTANGLE = 4
+}
+
 class RectangleVertexBuffer(drawType: Int, managed: Boolean) extends VertexBuffer(2 * 4 /*VERTICES_PER_RECTANGLE*/, drawType, managed) {
   import java.lang.Float.floatToRawIntBits
 
-  val VERTICES_PER_RECTANGLE = 4
   private val FLOAT_TO_RAW_INT_BITS_ZERO = floatToRawIntBits(0)
 
   def update(width: Float, height: Float) = _lock.synchronized {

@@ -62,34 +62,46 @@ trait GraphicsUnit {
   def blue = _blue
   def alpha = _alpha
 
-  def setPosition(x: Float, y: Float) {
+  def onDraw(gl: GL10) = if (_visible) onManagedDraw(gl)
+
+  def setPosition(x: Float, y: Float): Unit = {
     _x = x
     _y = y
     _localToParentTransformationDirty = true
     _parentToLocalTransformationDirty = true
   }
 
-  def setInitialPosition() {
+  def setInitialPosition(): Unit = {
     _x = _initialX
     _y = _initialY
     _localToParentTransformationDirty = true
     _parentToLocalTransformationDirty = true
   }
 
-  def rotate(rotation: Float){
-    _rotation = rotation
-    _localToParentTransformationDirty = true
-    _parentToLocalTransformationDirty = true
-  }
+  def scale(s: Float): Unit = scale(s, s)
 
-  def setColorA(red: Float, green: Float, blue: Float, alpha:Float) {
+  def setColor(red: Float, green: Float, blue: Float, alpha:Float): Unit = {
     _red = red
     _green = green
     _blue = blue
     _alpha=  alpha
   }
 
-  val setColor = setColorA(_: Float, _: Float, _: Float, 1f)
+  def setColor(red: Float, green: Float, blue: Float): Unit = setColor(red, green, blue, 1f)
+
+  def setRotationCenter(x: Float, y: Float): Unit = {
+    _rotationCenterX = x
+    _rotationCenterY = y
+    _localToParentTransformationDirty = true
+    _parentToLocalTransformationDirty = true
+  }
+
+  def setScaleCenter(x: Float, y: Float): Unit = {
+    _scaleCenterX = x
+    _scaleCenterY = y
+    _localToParentTransformationDirty = true
+    _parentToLocalTransformationDirty = true
+  }
 
   def getLocalToParentTransformation(): Transformation = {
     if(_localToParentTransformationDirty) {
@@ -108,6 +120,21 @@ trait GraphicsUnit {
 
     _localToParentTransformation
   }
+
+  def rotate(rotation: Float){
+    _rotation = rotation
+    _localToParentTransformationDirty = true
+    _parentToLocalTransformationDirty = true
+  }
+
+  def scale(x: Float, y: Float): Unit = {
+    _scaleX = x
+    _scaleY = y
+    _localToParentTransformationDirty = true
+    _parentToLocalTransformationDirty = true
+  }
+
+  def getLayerCenterCoordinates() = convertLocalToLayerCoordinates(0, 0)
 
   def getParentToLocalTransformation(): Transformation = {
     if(_parentToLocalTransformationDirty) {
@@ -128,6 +155,7 @@ trait GraphicsUnit {
     _parentToLocalTransformation
   }
 
+  def doDraw(gl: GL10): Unit
   def getLocalToLayerTransformation(): Transformation
   def getLayerToLocalTransformation(): Transformation
 
@@ -171,7 +199,6 @@ trait GraphicsUnit {
     _alpha = 1.0f
   }
 
-
   protected def onApplyTransformations(gl: GL10){
     applyTranslation(gl)
     applyRotation(gl)
@@ -197,13 +224,11 @@ trait GraphicsUnit {
       gl.glTranslatef(-_scaleCenterX, -_scaleCenterY, 0)
     }
   }
-//
-//  def onManagedDraw(final GL10 gl_, final Camera camera_){
-//        gl_.glPushMatrix();
-//        {
-//            this.onApplyTransformations(gl_);
-//            this.doDraw(gl_, camera_);
-//        }
-//        gl_.glPopMatrix();
-//    }
+
+  protected def onManagedDraw(gl: GL10) {
+    gl.glPushMatrix()
+    onApplyTransformations(gl)
+    doDraw(gl)
+    gl.glPopMatrix()
+  }
 }
