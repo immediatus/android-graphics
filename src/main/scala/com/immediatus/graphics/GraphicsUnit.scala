@@ -18,9 +18,6 @@ trait GraphicsUnit {
   private var _x = 0f
   private var _y = 0f
 
-  private val _initialX = _x
-  private val _initialY = _y
-
   private var _rotation = 0f
 
   private var _rotationCenterX = 0f
@@ -46,8 +43,6 @@ trait GraphicsUnit {
   def zIndex = _zIndex
   def x = _x
   def y = _y
-  def initialX = _initialX
-  def initialY = _initialY;
   def rotationCenterX = _rotationCenterX
   def rotationCenterY = _rotationCenterY
   def rotation = _rotation
@@ -67,13 +62,6 @@ trait GraphicsUnit {
   def setPosition(x: Float, y: Float): Unit = {
     _x = x
     _y = y
-    _localToParentTransformationDirty = true
-    _parentToLocalTransformationDirty = true
-  }
-
-  def setInitialPosition(): Unit = {
-    _x = _initialX
-    _y = _initialY
     _localToParentTransformationDirty = true
     _parentToLocalTransformationDirty = true
   }
@@ -184,20 +172,6 @@ trait GraphicsUnit {
   def convertLayerToLocalCoordinates(x: Float, y: Float) = getLayerToLocalTransformation().transform(x, y)
 
   def convertLayerToLocalCoordinates(coord: Float*) = getLayerToLocalTransformation().transform(coord: _*)
-
-  def reset(){
-    _visible = true
-    _ignoreUpdate = false
-    _x = this._initialX
-    _y = this._initialY
-    _rotation = 0
-    _scaleX = 1
-    _scaleY = 1
-    _red = 1.0f
-    _green = 1.0f
-    _blue = 1.0f
-    _alpha = 1.0f
-  }
 
   protected def onApplyTransformations(gl: GL10){
     applyTranslation(gl)
