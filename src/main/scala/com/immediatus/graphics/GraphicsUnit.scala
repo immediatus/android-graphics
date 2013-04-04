@@ -3,6 +3,8 @@ package com.immediatus.graphics
 import javax.microedition.khronos.opengles.GL10
 
 import com.immediatus.graphics.utils.Transformation
+import com.immediatus.graphics.utils.ConditionalApplicative._
+
 
 trait GraphicsUnit {
 
@@ -106,7 +108,8 @@ trait GraphicsUnit {
   def getLocalToParentTransformation(): Transformation = {
     if(_localToParentTransformationDirty) {
       _localToParentTransformationDirty = false
-      _localToParentTransformation = Transformation().
+       _red = red
+   _localToParentTransformation = Transformation().
         $if(_scaleX != 1 || _scaleY != 1) {
           _.postTranslate(-_scaleCenterX, -_scaleCenterY).
           postScale(_scaleX, _scaleY).

@@ -19,8 +19,6 @@ class Transformation(
   private final val DEG_TO_RAD = Math.PI.toFloat / 180.0f
   private def degToRad(degree: Float) =  DEG_TO_RAD * degree
 
-  def $if(condition: => Boolean)(f: Transformation => Transformation): Transformation = if(condition) f(this) else this
-
   def preTranslate(x: Float, y: Float): Transformation = Transformation(a, b, c, d, tx + x * a + y * c, ty + x * b + y * d)
 
   def postTranslate(x: Float, y: Float): Transformation = Transformation(a, b, c, d, tx + x, ty + y)
