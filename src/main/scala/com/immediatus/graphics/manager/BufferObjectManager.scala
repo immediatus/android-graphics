@@ -10,14 +10,20 @@ import javax.microedition.khronos.opengles.GL11;
 import com.immediatus.graphics.buffer.BufferObject
 
 
-class BufferObjectManager{
+object BufferObjectManager {
+
+  private val _activeInstance = new BufferObjectManager()
+
+  def activeInstance = _activeInstance
+}
+
+class BufferObjectManager {
   private val _bufferObjectsManaged = new HashSet[BufferObject] with SynchronizedSet[BufferObject]
   private val _bufferObjectsLoaded = new ArrayBuffer[BufferObject] with SynchronizedBuffer[BufferObject]
   private val _bufferObjectsToBeLoaded = new ArrayBuffer[BufferObject] with SynchronizedBuffer[BufferObject]
   private val _bufferObjectsToBeUnloaded = new ArrayBuffer[BufferObject] with SynchronizedBuffer[BufferObject]
 
-  private val _lock : AnyRef = new Object()
-
+  private val _lock: AnyRef = new Object()
 
   def clear() = _lock.synchronized {
     _bufferObjectsToBeLoaded.clear()

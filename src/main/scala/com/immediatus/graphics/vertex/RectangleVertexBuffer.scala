@@ -1,12 +1,12 @@
 package com.immediatus.graphics.vertex
 
-import com.immediatus.graphics.utils.FastFloatBuffer
+import com.immediatus.utils.FastFloatBuffer
 
 object RectangleVertexBuffer {
   final val VERTICES_PER_RECTANGLE = 4
 }
 
-class RectangleVertexBuffer(drawType: Int, managed: Boolean) extends VertexBuffer(2 * 4 /*VERTICES_PER_RECTANGLE*/, drawType, managed) {
+class RectangleVertexBuffer(drawType: Int, managed: Boolean) extends VertexBuffer(2 * RectangleVertexBuffer.VERTICES_PER_RECTANGLE, drawType, managed) {
   import java.lang.Float.floatToRawIntBits
 
   private val FLOAT_TO_RAW_INT_BITS_ZERO = floatToRawIntBits(0)

@@ -2,12 +2,12 @@ package com.immediatus.graphics
 
 import javax.microedition.khronos.opengles.GL10
 
-import com.immediatus.graphics.utils.Transformation
-import com.immediatus.graphics.utils.ConditionalApplicative._
+import com.immediatus.graphics.utils.{Transformation, Point, Size}
+import com.immediatus.graphics.camera.Camera
+import com.immediatus.utils.ConditionalApplicative._
 
 
 trait GraphicsUnit {
-
   private var _visible = true
   private var _ignoreUpdate = false
   private var _zIndex = 0
@@ -34,17 +34,18 @@ trait GraphicsUnit {
   private var _localToParentTransformationDirty = true
   private var _parentToLocalTransformationDirty = true
 
-  private var _localToParentTransformation = Transformation()
-  private var _parentToLocalTransformation = Transformation()
+  protected var _localToParentTransformation = Transformation()
+  protected var _parentToLocalTransformation = Transformation()
 
-  private var _localToLayerTransformation = Transformation()
-  private var _layerToLocalTransformation = Transformation()
+  protected var _localToLayerTransformation = Transformation()
+  protected var _layerToLocalTransformation = Transformation()
 
   def isVisible = _visible
   def isIgnoreUpdate = _ignoreUpdate
   def zIndex = _zIndex
   def x = _x
   def y = _y
+  def position = Point(_x, _y)
   def rotationCenterX = _rotationCenterX
   def rotationCenterY = _rotationCenterY
   def rotation = _rotation
@@ -59,7 +60,7 @@ trait GraphicsUnit {
   def blue = _blue
   def alpha = _alpha
 
-  def onDraw(gl: GL10) = if (_visible) onManagedDraw(gl)
+  def onDraw(gl: GL10, camera: Camera) = if (_visible) onManagedDraw(gl, camera)
 
   def setPosition(x: Float, y: Float): Unit = {
     _x = x
@@ -146,35 +147,17 @@ trait GraphicsUnit {
     _parentToLocalTransformation
   }
 
-  def doDraw(gl: GL10): Unit
+  def doDraw(gl: GL10, camera: Camera): Unit
   def getLocalToLayerTransformation(): Transformation
   def getLayerToLocalTransformation(): Transformation
 
-//  def getLocalToLayerTransformation(): Transformation = {
-//    _localToLayerTransformation = getLocalToParentTransformation().
-//      $if(parent != null) {
-//        _.postConcat(parent.getLocalToLayerTransformation())
-//      }
-//
-//    _localToLayerTransformation
-//  }
-//
-//  def getLayerToLocalTransformation(): Transformation = {
-//    _layerToLocalTransformation = getParentToLocalTransformation().
-//      $if(parent != null) {
-//        _.postConcat(parent.getLayerToLocalTransformation())
-//      }
-//
-//    _layerToLocalTransformation
-//  }
+  def convertLocalToLayerCoordinates(x: Float, y: Float): Iterator[Float] = getLocalToLayerTransformation().transform(x, y)
 
-  def convertLocalToLayerCoordinates(x: Float, y: Float) = getLocalToLayerTransformation().transform(x, y)
+  def convertLocalToLayerCoordinates(coord: Float*): Iterator[Float] = getLocalToLayerTransformation().transform(coord: _*)
 
-  def convertLocalToLayerCoordinates(coord: Float*) = getLocalToLayerTransformation().transform(coord: _*)
+  def convertLayerToLocalCoordinates(x: Float, y: Float): Iterator[Float] = getLayerToLocalTransformation().transform(x, y)
 
-  def convertLayerToLocalCoordinates(x: Float, y: Float) = getLayerToLocalTransformation().transform(x, y)
-
-  def convertLayerToLocalCoordinates(coord: Float*) = getLayerToLocalTransformation().transform(coord: _*)
+  def convertLayerToLocalCoordinates(coord: Float*): Iterator[Float] = getLayerToLocalTransformation().transform(coord: _*)
 
   protected def onApplyTransformations(gl: GL10){
     applyTranslation(gl)
@@ -202,10 +185,10 @@ trait GraphicsUnit {
     }
   }
 
-  protected def onManagedDraw(gl: GL10) {
+  protected def onManagedDraw(gl: GL10, camera: Camera) {
     gl.glPushMatrix()
     onApplyTransformations(gl)
-    doDraw(gl)
+    doDraw(gl, camera)
     gl.glPopMatrix()
   }
 }

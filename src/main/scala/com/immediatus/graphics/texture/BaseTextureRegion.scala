@@ -3,8 +3,8 @@ package com.immediatus.graphics.texture
 import javax.microedition.khronos.opengles.GL10
 import javax.microedition.khronos.opengles.GL11
 
-import com.immediatus.graphics.utils.GL10Wrapper
-import com.immediatus.graphics.utils.GL11Wrapper
+import com.immediatus.graphics.utils.{GL10Wrapper, GL11Wrapper}
+import com.immediatus.graphics.utils.{Point, Size}
 
 abstract class BaseTextureRegion(
     private val _texture: Texture,
@@ -12,7 +12,7 @@ abstract class BaseTextureRegion(
     private var _y: Int,
     private var _width: Int,
     private var _height: Int
-  ){
+  ) {
 
   private val _textureRegionBuffer = new TextureRegionBuffer(this,GL11.GL_STATIC_DRAW, true)
   initTextureBuffer()
@@ -34,6 +34,8 @@ abstract class BaseTextureRegion(
   def width_=(width: Int): Unit = _width = width
   def height = _height
   def height_=(height:Int): Unit = _height = height
+  def location = Point(_x, _y)
+  def size = Size(_width, _height)
   def texture = _texture
   def textureRegionBuffer = _textureRegionBuffer
   def isFlippedHorizontal = _textureRegionBuffer.isFlippedHorizontal

@@ -2,8 +2,9 @@ package com.immediatus.graphics.buffer
 
 import javax.microedition.khronos.opengles.GL11
 
+import com.immediatus.graphics.manager.BufferObjectManager
 import com.immediatus.graphics.utils.GL11Wrapper
-import com.immediatus.graphics.utils.FastFloatBuffer
+import com.immediatus.utils.FastFloatBuffer
 
 abstract class BufferObject(
     capacity: Int,
@@ -50,6 +51,14 @@ abstract class BufferObject(
     deleteBufferOnHardware(gl)
     _hardwareBufferID = -1
     _loadedToHardware = false
+  }
+
+  def loadToActiveBufferObjectManager() {
+    BufferObjectManager.activeInstance.loadBufferObject(this)
+  }
+
+  def unloadFromActiveBufferObjectManager() {
+    BufferObjectManager.activeInstance.unloadBufferObject(this);
   }
 
   private def deleteBufferOnHardware(gl: GL11) {

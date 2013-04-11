@@ -16,10 +16,13 @@ object GL11Wrapper {
   def apply(gl: GL11) = {
     _glWrappers.getOrElseUpdate(gl, new GL11Wrapper(gl))
   }
+
+  implicit def GL10Wrapper2GL11Wrapper(gl10w: GL10Wrapper): GL11Wrapper = apply(gl10w.gl.asInstanceOf[GL11])
+  implicit def GL10Wrapper2GL11Wrapper(gl11w: GL11Wrapper): GL10Wrapper = GL10Wrapper(gl11w.gl)
 }
 
 
-class GL11Wrapper(gl: GL11) {
+class GL11Wrapper(val gl: GL11) {
 
   private val HARDWAREBUFFERID_CONTAINER = new Array[Int](1)
   private var _currentHardwareBufferID = -1

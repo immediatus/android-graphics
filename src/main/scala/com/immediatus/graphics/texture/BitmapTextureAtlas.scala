@@ -43,11 +43,11 @@ class BitmapTextureAtlas(
     }
 
     protected override def bindTextureOnHardware(gl: GL10) {
-        super.bindTextureOnHardware(gl)
+      super.bindTextureOnHardware(gl)
 
-        val glFormat = pixelFormat.glFormat
-        val glType = pixelFormat.glType
+      val glFormat = pixelFormat.glFormat
+      val glType = pixelFormat.glType
 
-        gl.glTexImage2D(GL10.GL_TEXTURE_2D, 0, glFormat, width, height, 0, glFormat, glType, null)
+      gl.glTexImage2D(GL10.GL_TEXTURE_2D, 0, glFormat, width, height, 0, glFormat, glType, null)
     }
 }

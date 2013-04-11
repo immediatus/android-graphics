@@ -1,4 +1,4 @@
-package com.immediatus.graphics.utils
+package com.immediatus.utils
 
 import scala.util.Random
 import scala.collection.mutable.Stack
